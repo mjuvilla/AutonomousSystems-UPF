@@ -95,6 +95,7 @@ def breadthFirstSearch(problem):
 
     queue = util.Queue()
     queue.push([(start_node, "", 0)])
+    queue.push([(start_node, "Stop", 0)])
 
     visited = list()
 
