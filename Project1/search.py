@@ -91,31 +91,32 @@ def depthFirstSearch(problem):
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    print "Start:", problem.getStartState()
-    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
-    print "Start's successors:", problem.getSuccessors(problem.getStartState())
-
     start_node = problem.getStartState()
 
     queue = util.Queue()
-    start_children = problem.getSuccessors(start_node)
-    for child in start_children:
-        queue.push(child)
+    queue.push([(start_node, "", 0)])
 
     visited = list()
-    visited.append(start_node)
 
     while not queue.isEmpty():
-        node = queue.pop()
-        visited.append(node[0])
-        if problem.isGoalState(node):
-            break
-        children = problem.getSuccessors(node[0])
+        path = queue.pop()
+        # check if this state has been already visited
+        if path[-1][0] not in visited:
+            # if not, now it is
+            visited.append(path[-1][0])
+            # check if goal state
+            if problem.isGoalState(path[-1][0]):
+                return [node[1] for node in path][1:]
+            # if not goal state, expand children
+            children = problem.getSuccessors(path[-1][0])
+            for child in children:
+                # if this state has not been visited, add it to the queue
+                new_path = list()
+                new_path += path
+                new_path.append(child)
+                queue.push(new_path)
 
-        for child in children:
-            if child[0] not in visited:
-                queue.push(child)
+    return []
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
@@ -132,7 +133,7 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    cosa = 0
 
 
 # Abbreviations
