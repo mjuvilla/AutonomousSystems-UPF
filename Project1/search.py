@@ -94,7 +94,6 @@ def breadthFirstSearch(problem):
     start_node = problem.getStartState()
 
     queue = util.Queue()
-    queue.push([(start_node, "", 0)])
     queue.push([(start_node, "Stop", 0)])
 
     visited = list()
@@ -133,9 +132,35 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    cosa = 0
 
+    p_queue = util.PriorityQueue()
+    p_queue.push([(problem.getStartState(), "Stop", 0)], 0)
+
+    visited = list()
+
+    while not p_queue.isEmpty():
+        path = p_queue.pop()
+        # check if this state has been already visited
+        if path[-1][0] not in visited:
+            # if not, now it is
+            visited.append(path[-1][0])
+            # check if goal state
+            if problem.isGoalState(path[-1][0]):
+                return [node[1] for node in path][1:]
+            # if not goal state, expand children
+            children = problem.getSuccessors(path[-1][0])
+            for child in children:
+                # if this state has not been visited, add it to the queue
+                new_path = list()
+                new_path += path
+                new_path.append(child)
+                # get the cost of all the current path (excluding the root node)
+                g = problem.getCostOfActions([action[1] for action in new_path][1:])
+                # estimate the cost from the child node to the goal node
+                h = heuristic(child[0], problem)
+                p_queue.push(new_path, g+h)
+
+    return []
 
 # Abbreviations
 bfs = breadthFirstSearch
