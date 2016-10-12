@@ -72,6 +72,32 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
+def search_graph(problem, openlist):
+    start_node = problem.getStartState()
+
+    openlist.push([(start_node, "Stop", 0)])
+
+    visited = list()
+
+    while not openlist.isEmpty():
+        path = openlist.pop()
+        # check if this state has been already visited
+        if path[-1][0] not in visited:
+            # if not, now it is
+            visited.append(path[-1][0])
+            # check if goal state
+            if problem.isGoalState(path[-1][0]):
+                return [node[1] for node in path][1:]
+            # if not goal state, expand children
+            children = problem.getSuccessors(path[-1][0])
+            for child in children:
+                # if this state has not been visited, add it to the queue
+                new_path = list()
+                new_path += path
+                new_path.append(child)
+                openlist.push(new_path)
+    return []
+
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
@@ -86,42 +112,17 @@ def depthFirstSearch(problem):
     print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return search_graph(problem, util.Stack())
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    start_node = problem.getStartState()
-
-    queue = util.Queue()
-    queue.push([(start_node, "Stop", 0)])
-
-    visited = list()
-
-    while not queue.isEmpty():
-        path = queue.pop()
-        # check if this state has been already visited
-        if path[-1][0] not in visited:
-            # if not, now it is
-            visited.append(path[-1][0])
-            # check if goal state
-            if problem.isGoalState(path[-1][0]):
-                return [node[1] for node in path][1:]
-            # if not goal state, expand children
-            children = problem.getSuccessors(path[-1][0])
-            for child in children:
-                # if this state has not been visited, add it to the queue
-                new_path = list()
-                new_path += path
-                new_path.append(child)
-                queue.push(new_path)
-
-    return []
+    return search_graph(problem, util.Queue())
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    g = lambda path: problem.getCostOfActions([node[1] for node in path][1:])
+    p_queue = util.PriorityQueueWithFunction(g)
+    return search_graph(problem, p_queue)
 
 def nullHeuristic(state, problem=None):
     """
@@ -133,34 +134,9 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
 
-    p_queue = util.PriorityQueue()
-    p_queue.push([(problem.getStartState(), "Stop", 0)], 0)
-
-    visited = list()
-
-    while not p_queue.isEmpty():
-        path = p_queue.pop()
-        # check if this state has been already visited
-        if path[-1][0] not in visited:
-            # if not, now it is
-            visited.append(path[-1][0])
-            # check if goal state
-            if problem.isGoalState(path[-1][0]):
-                return [node[1] for node in path][1:]
-            # if not goal state, expand children
-            children = problem.getSuccessors(path[-1][0])
-            for child in children:
-                # if this state has not been visited, add it to the queue
-                new_path = list()
-                new_path += path
-                new_path.append(child)
-                # get the cost of all the current path (excluding the root node)
-                g = problem.getCostOfActions([action[1] for action in new_path][1:])
-                # estimate the cost from the child node to the goal node
-                h = heuristic(child[0], problem)
-                p_queue.push(new_path, g+h)
-
-    return []
+    f = lambda path: problem.getCostOfActions([node[1] for node in path][1:]) + heuristic(path[-1][0], problem)
+    p_queue = util.PriorityQueueWithFunction(f)
+    return search_graph(problem, p_queue)
 
 # Abbreviations
 bfs = breadthFirstSearch
