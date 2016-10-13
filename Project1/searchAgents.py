@@ -483,22 +483,8 @@ def foodHeuristic(state, problem):
     if len(foodList) == 0:
         return 0
             
-    furthestFood = furthest_point(position, foodList)
-    return util.manhattanDistance(position, furthestFood) + len(foodList) - 1
-
-def furthest_point(origin, candidates):
-    if len(candidates) == 0:
-        return 0
-    
-    target = candidates[0]
-    max_cost = util.manhattanDistance(origin, target)
-    for x in candidates[1:]:
-        cost = util.manhattanDistance(origin, x)
-        if max_cost > cost:
-            max_cost = cost
-            target = x
-
-    return target
+    closestFood = closest_point(position, foodList)
+    return util.manhattanDistance(position, closestFood) + len(foodList) - 1
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
