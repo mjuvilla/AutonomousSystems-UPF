@@ -1,0 +1,3 @@
+(move sq01 sq02)
+(move sq02 sq01)
+(move sq01 sq00)

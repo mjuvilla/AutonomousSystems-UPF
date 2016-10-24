@@ -9,7 +9,7 @@
 	)
 
 	(:predicates
-		(pacman-at-position ?x - position) (food-at-position ?x - position) (adjacent ?x ?y - position) 	
+		(pacman-at-position ?x - position) (empty-at-position ?x - position) (adjacent ?x ?y - position) 	
 	) 
 
 	(:action move
@@ -19,7 +19,7 @@
 						)
 		:effect (and (pacman-at-position ?next-position)
 				(not (pacman-at-position ?current-position))
-				(not (food-at-position ?next-position))
+				(empty-at-position ?next-position)
 				)
 	)
 )

@@ -7,17 +7,18 @@
 	)
 
 	(:init
-		(pacman-at-position sq00)
-		(food-at-position sq01)
-		(food-at-position sq02)
-		(adjacent sq00 sq01)  
-		(adjacent sq01 sq02)  	
+		(pacman-at-position sq01)
+		(empty-at-position sq01)
+		(adjacent sq00 sq01) 
+		(adjacent sq01 sq00)  
+		(adjacent sq01 sq02)
+		(adjacent sq02 sq01)  	
 	) 
 
 	(:goal
-		(and (not(food-at-position sq01)) 
-		     (not(food-at-position sq02))
-		     )
+		(and (empty-at-position sq00)
+			 (empty-at-position sq02)
+		   	)
 	)
 
 )
