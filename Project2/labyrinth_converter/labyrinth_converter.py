@@ -18,7 +18,7 @@ def parse_labyrinth(labyrinth_filename):
     pacman_at = ()
     adjacencies = {}
 
-    square_symbols = (" ", ".")
+    square_symbols = (" ", ".", "P")
 
     for row_idx, row in enumerate(labyrinth_list):
         for col_idx, square in enumerate(row):
