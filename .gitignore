@@ -1,3 +1,9 @@
+*Project3
+*Project2/**/*.pddl
+*Project2/**/*.xls
+*Project2/**/*.soln
+*Project2/**/*.test
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
