@@ -74,7 +74,34 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        # get the position of each food dot
+        food_position = []
+        for row, food_rows in enumerate(newFood):
+            for col, food in enumerate(food_rows):
+                if food:
+                    food_position.append((row, col))
+
+        # list that contains the distance between the remaining food and the agent
+        diff_food_agent = [(abs(newPos[0]-x)+abs(newPos[1]-y)) for x, y in food_position]
+        # list that contains the distance between the ghosts and the agent
+        diff_ghosts_agent = [abs(newPos[0]-ghostState.configuration.pos[0]) + abs(newPos[1]-ghostState.configuration.pos[1]) for ghostState in newGhostStates]
+
+        # assign more score to positions closer to food
+        if diff_food_agent: # this checks if diff_food_agent is not empty
+            closest_food_score = 10/float(min(diff_food_agent))
+        # if the list is empty, it means that with this move we win
+        else:
+            closest_food_score = 10
+
+        ghosts_score = 0
+        # if the distance to a ghost is zero, this move is a really bad idea
+        # also, if a ghost is at distance 1, it is not a good idea to stop
+        if 0.0 in diff_ghosts_agent or (1.0 in diff_ghosts_agent and action == "Stop"):
+            ghosts_score = -1000
+
+        # we also take into account the length of the remaining dot foods, as if this movement makes the agent eat
+        # a food dot, we will have an element less in this list
+        return closest_food_score + ghosts_score - 10*len(diff_food_agent)
 
 def scoreEvaluationFunction(currentGameState):
     """
