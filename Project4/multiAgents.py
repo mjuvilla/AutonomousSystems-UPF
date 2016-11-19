@@ -18,6 +18,7 @@ import random, util
 
 from game import Agent
 
+
 class ReflexAgent(Agent):
     """
       A reflex agent chooses an action at each choice point by examining
@@ -27,7 +28,6 @@ class ReflexAgent(Agent):
       it in any way you see fit, so long as you don't touch our method
       headers.
     """
-
 
     def getAction(self, gameState):
         """
@@ -45,7 +45,7 @@ class ReflexAgent(Agent):
         scores = [self.evaluationFunction(gameState, action) for action in legalMoves]
         bestScore = max(scores)
         bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
-        chosenIndex = random.choice(bestIndices) # Pick randomly among the best
+        chosenIndex = random.choice(bestIndices)  # Pick randomly among the best
 
         "Add more of your code here if you want to"
 
@@ -82,13 +82,15 @@ class ReflexAgent(Agent):
                     food_position.append((row, col))
 
         # list that contains the distance between the remaining food and the agent
-        diff_food_agent = [(abs(newPos[0]-x)+abs(newPos[1]-y)) for x, y in food_position]
+        diff_food_agent = [(abs(newPos[0] - x) + abs(newPos[1] - y)) for x, y in food_position]
         # list that contains the distance between the ghosts and the agent
-        diff_ghosts_agent = [abs(newPos[0]-ghostState.configuration.pos[0]) + abs(newPos[1]-ghostState.configuration.pos[1]) for ghostState in newGhostStates]
+        diff_ghosts_agent = [
+            abs(newPos[0] - ghostState.configuration.pos[0]) + abs(newPos[1] - ghostState.configuration.pos[1]) for
+            ghostState in newGhostStates]
 
         # assign more score to positions closer to food
-        if diff_food_agent: # this checks if diff_food_agent is not empty
-            closest_food_score = 10/float(min(diff_food_agent))
+        if diff_food_agent:  # this checks if diff_food_agent is not empty
+            closest_food_score = 10 / float(min(diff_food_agent))
         # if the list is empty, it means that with this move we win
         else:
             closest_food_score = 10
@@ -97,11 +99,12 @@ class ReflexAgent(Agent):
         # if the distance to a ghost is zero, this move is a really bad idea
         # also, if a ghost is at distance 1, it is not a good idea to stop
         if 0.0 in diff_ghosts_agent or (1.0 in diff_ghosts_agent and action == "Stop"):
-            ghosts_score = -1000
+            ghosts_score = - float("inf")
 
         # we also take into account the length of the remaining dot foods, as if this movement makes the agent eat
         # a food dot, we will have an element less in this list
-        return closest_food_score + ghosts_score - 10*len(diff_food_agent)
+        return closest_food_score + ghosts_score - 10 * len(diff_food_agent)
+
 
 def scoreEvaluationFunction(currentGameState):
     """
@@ -112,6 +115,7 @@ def scoreEvaluationFunction(currentGameState):
       (not reflex agents).
     """
     return currentGameState.getScore()
+
 
 class MultiAgentSearchAgent(Agent):
     """
@@ -128,10 +132,11 @@ class MultiAgentSearchAgent(Agent):
       is another abstract class.
     """
 
-    def __init__(self, evalFn = 'scoreEvaluationFunction', depth = '2'):
-        self.index = 0 # Pacman is always agent index 0
+    def __init__(self, evalFn='scoreEvaluationFunction', depth='2'):
+        self.index = 0  # Pacman is always agent index 0
         self.evaluationFunction = util.lookup(evalFn, globals())
         self.depth = int(depth)
+
 
 class MinimaxAgent(MultiAgentSearchAgent):
     """
@@ -139,34 +144,26 @@ class MinimaxAgent(MultiAgentSearchAgent):
     """
 
     def minimax(self, state, depth, agent, num_agents):
+        # if we have completed a turn, reduce the depth in 1
         if agent % num_agents == 0 and agent != 0:
             depth -= 1
-
-        if depth == 0:
-            return self.evaluationFunction(state)
 
         agent = agent % num_agents
         legal_actions = state.getLegalActions(agent)
 
-        if not state.getLegalActions(agent):
+        # if it is a terminal node (no more moves to do), return the score
+        if depth == 0 or not legal_actions:
             return self.evaluationFunction(state)
 
         if agent == 0:
-            bestValue = float("-inf")
-            for action in legal_actions:
-                future_state = state.generateSuccessor(agent, action)
-                v = self.minimax(future_state, depth, agent+1, num_agents)
-                bestValue = max(bestValue, v)
-            return bestValue
+            scores = [self.minimax(state.generateSuccessor(agent, action), depth, agent + 1, num_agents) for action in
+                      legal_actions]
+            return max(scores)
 
         else:
-            bestValue = float("inf")
-            for action in legal_actions:
-                future_state = state.generateSuccessor(agent, action)
-                v = self.minimax(future_state, depth, agent + 1, num_agents)
-                bestValue = min(bestValue, v)
-            return bestValue
-
+            scores = [self.minimax(state.generateSuccessor(agent, action), depth, agent + 1, num_agents) for action in
+                      legal_actions]
+            return min(scores)
 
     def getAction(self, gameState):
         """
@@ -193,6 +190,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             score_actions[action] = self.minimax(future_state, self.depth, 1, gameState.getNumAgents())
 
         return max(score_actions, key=score_actions.get)
+
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
@@ -251,10 +249,32 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 break
         return max(score_actions, key=score_actions.get)
 
+
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
       Your expectimax agent (question 4)
     """
+
+    def expectimax(self, state, depth, agent, num_agents):
+        if agent % num_agents == 0 and agent != 0:
+            depth -= 1
+
+        agent = agent % num_agents
+        legal_actions = state.getLegalActions(agent)
+
+        if depth == 0 or not legal_actions:
+            return self.evaluationFunction(state)
+
+        if agent == 0:
+            scores = [self.expectimax(state.generateSuccessor(agent, action), depth, agent + 1, num_agents) for action
+                      in
+                      legal_actions]
+            return max(scores)
+
+        else:
+            scores = [self.expectimax(state.generateSuccessor(agent, action), depth, agent + 1, num_agents) for action
+                      in legal_actions]
+            return sum(scores) / len(scores)
 
     def getAction(self, gameState):
         """
@@ -263,8 +283,14 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           All ghosts should be modeled as choosing uniformly at random from their
           legal moves.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        legal_actions = gameState.getLegalActions(0)
+        score_actions = dict()
+        for action in legal_actions:
+            future_state = gameState.generateSuccessor(0, action)
+            score_actions[action] = self.expectimax(future_state, self.depth, 1, gameState.getNumAgents())
+
+        return max(score_actions, key=score_actions.get)
 
 def betterEvaluationFunction(currentGameState):
     """
@@ -274,8 +300,32 @@ def betterEvaluationFunction(currentGameState):
       DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
 
-# Abbreviation
+    if currentGameState.isWin():
+        return float("inf")
+    if currentGameState.isLose():
+        return - float("inf")
+
+    newPos = currentGameState.getPacmanPosition()
+
+    newFood = currentGameState.getFood()
+    newGhostStates = currentGameState.getGhostStates()
+
+    # get the position of each food dot
+    food_position = []
+    for row, food_rows in enumerate(newFood):
+        for col, food in enumerate(food_rows):
+            if food:
+                food_position.append((row, col))
+
+    # list that contains the distance between the remaining food and the agent
+    diff_food_agent = [util.manhattanDistance(newPos, food) for food in
+                       food_position]  # list that contains the distance between the ghosts and the agent
+    diff_ghosts_agent = [util.manhattanDistance(newPos, ghostState.configuration.pos) for
+        ghostState in newGhostStates]
+
+    score = -0.03*len(diff_food_agent) + 1 / float(min(diff_food_agent)) + currentGameState.getScore()
+
+    return -0.03*len(diff_food_agent) + 1 / float(min(diff_food_agent)) + currentGameState.getScore()
+
 better = betterEvaluationFunction
-
