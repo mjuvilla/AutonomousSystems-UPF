@@ -196,13 +196,58 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     """
       Your minimax agent with alpha-beta pruning (question 3)
     """
+    def alphabeta(self, state, depth, alpha, beta, agent, num_agents):
+        if agent % num_agents == 0 and agent != 0:
+            depth -= 1
+
+        if depth == 0:
+            return self.evaluationFunction(state)
+
+        agent = agent % num_agents
+        legal_actions = state.getLegalActions(agent)
+
+        if not state.getLegalActions(agent):
+            return self.evaluationFunction(state)
+
+        if agent == 0:
+            bestValue = float("-inf")
+            for action in legal_actions:
+                future_state = state.generateSuccessor(agent, action)
+                v = self.alphabeta(future_state, depth, alpha, beta, agent + 1, num_agents)
+                bestValue = max(bestValue, v)
+                alpha = max(alpha, bestValue)
+                if beta <= alpha:
+                    break
+            return bestValue
+
+        else:
+            bestValue = float("inf")
+            for action in legal_actions:
+                future_state = state.generateSuccessor(agent, action)
+                v = self.alphabeta(future_state, depth, alpha, beta, agent + 1, num_agents)
+                bestValue = min(bestValue, v)
+                beta = min(beta, bestValue)
+                if beta <= alpha:
+                    break
+            return bestValue
+
 
     def getAction(self, gameState):
         """
           Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        legal_actions = gameState.getLegalActions(0)
+        score_actions = dict()
+        alpha = float("-inf")
+        beta = float("inf")
+        for action in legal_actions:
+            future_state = gameState.generateSuccessor(0, action)
+            score_actions[action] = self.alphabeta(future_state, self.depth, alpha, beta, 1, gameState.getNumAgents())
+            alpha = max(alpha, score_actions[action])
+            if beta <= alpha:
+                break
+        return max(score_actions, key=score_actions.get)
 
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
