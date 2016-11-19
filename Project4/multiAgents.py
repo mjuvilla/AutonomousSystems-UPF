@@ -99,7 +99,7 @@ class ReflexAgent(Agent):
         # if the distance to a ghost is zero, this move is a really bad idea
         # also, if a ghost is at distance 1, it is not a good idea to stop
         if 0.0 in diff_ghosts_agent or (1.0 in diff_ghosts_agent and action == "Stop"):
-            ghosts_score = -1000
+            ghosts_score = - float("inf")
 
         # we also take into account the length of the remaining dot foods, as if this movement makes the agent eat
         # a food dot, we will have an element less in this list
@@ -238,6 +238,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           All ghosts should be modeled as choosing uniformly at random from their
           legal moves.
         """
+
         legal_actions = gameState.getLegalActions(0)
         score_actions = dict()
         for action in legal_actions:
@@ -245,7 +246,6 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             score_actions[action] = self.expectimax(future_state, self.depth, 1, gameState.getNumAgents())
 
         return max(score_actions, key=score_actions.get)
-
 
 def betterEvaluationFunction(currentGameState):
     """
@@ -255,8 +255,32 @@ def betterEvaluationFunction(currentGameState):
       DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
 
+    if currentGameState.isWin():
+        return float("inf")
+    if currentGameState.isLose():
+        return - float("inf")
 
-# Abbreviation
+    newPos = currentGameState.getPacmanPosition()
+
+    newFood = currentGameState.getFood()
+    newGhostStates = currentGameState.getGhostStates()
+
+    # get the position of each food dot
+    food_position = []
+    for row, food_rows in enumerate(newFood):
+        for col, food in enumerate(food_rows):
+            if food:
+                food_position.append((row, col))
+
+    # list that contains the distance between the remaining food and the agent
+    diff_food_agent = [util.manhattanDistance(newPos, food) for food in
+                       food_position]  # list that contains the distance between the ghosts and the agent
+    diff_ghosts_agent = [util.manhattanDistance(newPos, ghostState.configuration.pos) for
+        ghostState in newGhostStates]
+
+    score = -0.03*len(diff_food_agent) + 1 / float(min(diff_food_agent)) + currentGameState.getScore()
+
+    return -0.03*len(diff_food_agent) + 1 / float(min(diff_food_agent)) + currentGameState.getScore()
+
 better = betterEvaluationFunction
