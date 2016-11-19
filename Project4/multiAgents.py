@@ -74,6 +74,8 @@ class ReflexAgent(Agent):
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
+
+
         "*** YOUR CODE HERE ***"
         # get the position of each food dot
         food_position = []
@@ -81,6 +83,9 @@ class ReflexAgent(Agent):
             for col, food in enumerate(food_rows):
                 if food:
                     food_position.append((row, col))
+
+        if not food_position:
+            return float("inf")
 
         # list that contains the distance between the remaining food and the agent
         diff_food_agent = [(abs(newPos[0] - x) + abs(newPos[1] - y)) for x, y in food_position]
@@ -90,11 +95,7 @@ class ReflexAgent(Agent):
             ghostState in newGhostStates]
 
         # assign more score to positions closer to food
-        if diff_food_agent:  # this checks if diff_food_agent is not empty
-            closest_food_score = 10 / float(min(diff_food_agent))
-        # if the list is empty, it means that with this move we win
-        else:
-            closest_food_score = 10
+        closest_food_score = 10 / float(min(diff_food_agent))
 
         ghosts_score = 0
         # if the distance to a ghost is zero, this move is a really bad idea
