@@ -15,7 +15,6 @@
 from util import manhattanDistance
 from game import Directions
 import random, util
-from searchAgents import mazeDistance
 
 from game import Agent
 
@@ -256,22 +255,20 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             scores = [(self.expectimax(state.generateSuccessor(agent, action), depth, agent + 1, num_agents)[0], action)
                       for action in legal_actions]
 
-            #it improves the results, but not sure if we can do this
+            stop_action = False
+            stop_score = 0
+            stop_index = 0
+            for idx, (score, action) in enumerate(scores):
+                if action == "Stop":
+                    stop_score = score
+                    stop_index = idx
+                    stop_action = True
 
-            # stop_action = False
-            # stop_score = 0
-            # stop_index = 0
-            # for idx, (score, action) in enumerate(scores):
-            #     if action == "Stop":
-            #         stop_score = score
-            #         stop_index = idx
-            #         stop_action = True
-            #
-            # if stop_action:
-            #     for score, action in scores:
-            #         if action != "Stop":
-            #             if score == stop_score:
-            #                 scores[stop_index] = (-float("inf"), "Stop")
+            if stop_action:
+                for score, action in scores:
+                    if action != "Stop":
+                        if score == stop_score:
+                            scores[stop_index] = (-float("inf"), "Stop")
 
             return sorted(scores, key=lambda x: x[0], reverse=True)[0]
 
@@ -307,12 +304,10 @@ def betterEvaluationFunction(currentGameState):
     if currentGameState.isLose():
         return - float("inf")
 
-    score = 0
-
     newPos = currentGameState.getPacmanPosition()
 
     newFood = currentGameState.getFood()
-    newCapsules = currentGameState.getCapsules()
+    newGhostStates = currentGameState.getGhostStates()
 
     # get the position of each food dot
     food_position = []
@@ -324,26 +319,14 @@ def betterEvaluationFunction(currentGameState):
     # list that contains the distance between the remaining food and the agent
     diff_food_agent = [util.manhattanDistance(newPos, food) for food in
                        food_position]  # list that contains the distance between the ghosts and the agent
+    diff_ghosts_agent = [util.manhattanDistance(newPos, ghostState.configuration.pos) for
+                         ghostState in newGhostStates]
 
-    diff_capsules_agent = [util.manhattanDistance(newPos, capsule) for
-                         capsule in newCapsules]
+    ScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
-    closest_food = sorted(food_position, key=lambda x: util.manhattanDistance(newPos, x))[:3]
-    closest_capsules = sorted(newCapsules, key=lambda x: util.manhattanDistance(newPos, x))[:3]
-
-    food_left = len(diff_food_agent)
-    capsules_left = len(diff_capsules_agent)
-
-    diff_food_agent = [mazeDistance(newPos, food, currentGameState) for food in closest_food]
-    diff_capsules_agent = [mazeDistance(newPos, capsule, currentGameState) for capsule in closest_capsules]
-
-    if capsules_left:
-        score += - capsules_left + 1 / float(min(diff_capsules_agent))
-    score += -0.03 * food_left + 1 / float(min(diff_food_agent)) + currentGameState.getScore()
+    score = -0.03 * len(diff_food_agent) + 1 / float(min(diff_food_agent)) + currentGameState.getScore()
 
     return score
 
-def square(x):
-    return x*x
 
 better = betterEvaluationFunction
