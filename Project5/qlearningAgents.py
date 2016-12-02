@@ -42,7 +42,7 @@ class QLearningAgent(ReinforcementAgent):
         "You can initialize Q-values here..."
         ReinforcementAgent.__init__(self, **args)
         "*** YOUR CODE HERE ***"
-        self.Qvalues = dict()
+        self.Qvalues = util.Counter()
 
     def getQValue(self, state, action):
         """
@@ -79,8 +79,11 @@ class QLearningAgent(ReinforcementAgent):
         """
         "*** YOUR CODE HERE ***"
         q_values = [(self.getQValue(state, action), action) for action in self.getLegalActions(state)]
+        # get the maximum value from the QValues
         max_qvalue = max(q_values,key=lambda item:item[0])[0]
+        # get all the actions that have this max value
         max_actions = filter(lambda x: x[0] == max_qvalue, q_values)
+        # select randomly one of these best actions
         return random.choice(max_actions)[1]
 
     def getAction(self, state):
